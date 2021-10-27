@@ -1,0 +1,6 @@
+framework module Pods_FacebookExample {
+  umbrella header "Pods-FacebookExample-umbrella.h"
+
+  export *
+  module * { export * }
+}

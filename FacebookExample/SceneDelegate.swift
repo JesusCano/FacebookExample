@@ -6,17 +6,36 @@
 //
 
 import UIKit
+import FBSDKCoreKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else {
+            return
+        }
+        
+        ApplicationDelegate.shared.application(UIApplication.shared, open: url, sourceApplication: nil, annotation: [UIApplication.OpenURLOptionsKey.annotation])
+    }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        self.window = UIWindow(windowScene: windowScene)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(showLoginScreen), name: NSNotification.Name("SHOW_LOGIN_SCREEN"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(showProfileScreen), name: NSNotification.Name("SHOW_PROFILE_SCREEN"), object: nil)
+        
+        if let _ = AccessToken.current {
+            showProfileScreen()
+        } else {
+            showLoginScreen()
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -48,5 +67,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
 
+}
+
+// MARK: - Change App RootViewController
+
+extension SceneDelegate {
+    
+    @objc private func showLoginScreen() {
+        let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        let viewController = mainStoryboard.instantiateViewController(identifier: "ViewController")
+        window?.rootViewController = viewController
+    }
+    
+    @objc private func showProfileScreen() {
+        let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        let viewController = mainStoryboard.instantiateViewController(identifier: "ProfileViewController")
+        window?.rootViewController = viewController
+    }
+    
 }
 
